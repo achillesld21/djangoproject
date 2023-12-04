@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block page_title %}ADD BLOG{% endblock %}
+
+{% block css_file  %}
+    <link rel="stylesheet" href="{% static "blog/index.css" %}"/>
+{% endblock %}
+
+{% block page_content %}
+
+<div class="container">
+<form action="/add-post" method="POST">
+ {% csrf_token %}
+{{ form }}
+<button type="submit" class="btn btn-primary">Save</button>
+</form>
+
+
+</div>
+
+{% endblock %}
