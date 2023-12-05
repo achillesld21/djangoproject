@@ -4,7 +4,7 @@ from .models import blog_post
 class create_blog(forms.ModelForm):
     class Meta:
         model = blog_post
-        fields = ['category','heading','content','user']
+        fields = ['category','heading','content','user','image']
         widgets={
             'category': forms.TextInput(attrs={'class': 'form-control'}),
             'heading': forms.TextInput(attrs={'class': 'form-control'}),
