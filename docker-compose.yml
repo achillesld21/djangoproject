@@ -12,3 +12,11 @@ services:
       - ./app:/app
     command: >
       sh -c "python manage.py runserver 0.0.0.0:8000"
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: blog_site
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
