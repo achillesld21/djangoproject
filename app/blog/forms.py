@@ -6,6 +6,9 @@ class create_blog(forms.ModelForm):
     class Meta:
         model = blog_post
         fields = ['category', 'heading', 'content', 'user', 'image']
+
+        image = forms.ImageField(label='Blog Pic', required=False)
+
         widgets = {
             'category': forms.TextInput(attrs={'class': 'form-control'}),
             'heading': forms.TextInput(attrs={'class': 'form-control'}),

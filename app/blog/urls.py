@@ -7,7 +7,7 @@ router = routers.DefaultRouter()
 urlpatterns = router.urls
 
 urlpatterns += [
-    path("", views.StartingPage.as_view(), name="starting-page"),
+    path("home", views.StartingPage.as_view(), name="starting-page"),
     path("posts", views.AllPosts.as_view(), name="posts-page"),
     path("posts/<slug:slug>", views.PostDetails.as_view(),
          name="posts-detail-page"),
