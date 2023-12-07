@@ -19,7 +19,7 @@ class blog_post(models.Model):
     category = models.CharField(max_length=20)
     heading = models.CharField(max_length=50)
     content = models.TextField()
-    image = models.ImageField(upload_to="images", null=True)
+    image = models.ImageField(upload_to="images/", null=True)
     user = models.ForeignKey(
         user, on_delete=models.SET_NULL, null=True, related_name="posts"
     )

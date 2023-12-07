@@ -2,7 +2,7 @@ from django.shortcuts import render
 from .models import blog_post
 from django.views.generic.edit import CreateView
 from django.views.generic import ListView
-from .forms import create_blog
+from .forms import CreateBlog
 from django.views import View
 from my_blog_site.serializers import BlogSerializer
 from django.http import JsonResponse
@@ -17,9 +17,9 @@ from rest_framework import status
 class AddPost(CreateView):
 
     model = blog_post
-    form_class = create_blog
+    form_class = CreateBlog
     template_name = "blog/add-post.html"
-    success_url = "/"
+    success_url = "/home"
 
 
 class StartingPage(ListView):
