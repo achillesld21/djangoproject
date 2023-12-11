@@ -7,10 +7,10 @@
     <link rel="stylesheet" href="{% static "blog/index.css" %}"/>
 {% endblock %}
 
-{% block page_content %}
 
+{% block page_content %}
 <div class="container">
-<form action="" method="POST" enctype="multipart/form-data">
+<form action="" method="POST" enctype="multipart/form-data" id="myForm">
  {% csrf_token %}
 {{ form }}
 <button type="submit" class="btn btn-primary">Save</button>
@@ -20,3 +20,26 @@
 </div>
 
 {% endblock %}
+{% block script %}
+<script>
+document.getElementById('myForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+    
+        // Collect form data
+        const formData = new FormData(event.target);
+        (async () => {
+            try {
+                const res2 = fetch('http://localhost:8000/addpost', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
+                    },
+                    body: formData
+                });
+            } catch (err) {
+                console.log(err);
+            }
+        })();
+}
+</script>
+{% endblock  %}

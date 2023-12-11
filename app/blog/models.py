@@ -24,7 +24,7 @@ class blog_post(models.Model):
         user, on_delete=models.SET_NULL, null=True, related_name="posts"
     )
     posted_date = models.DateField(auto_now_add=True)
-    slug = models.SlugField(unique=True, db_index=True)
+    slug = models.SlugField(db_index=True, null=True)
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.heading)
