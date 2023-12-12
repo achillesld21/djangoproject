@@ -17,10 +17,13 @@ RUN python -m venv /py && \
         then /py/bin/pip install -r /tmp/requirements.dev.txt ; \
     fi && \
     rm -rf /tmp && \
+    mkdir -p /app/staticfiles && \
     adduser \
         --disabled-password \
         --no-create-home \
         django-user
+
+CMD ["/venv/bin/gunicorn", "-b", "0.0.0.0:8000", "--chdir", "app/my_blog_site", "my_blog_site.wsgi:application"]
 
 
 ENV PATH="/py/bin:$PATH"
