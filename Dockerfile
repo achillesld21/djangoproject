@@ -23,7 +23,7 @@ RUN python -m venv /py && \
         --no-create-home \
         django-user
 
-CMD ["/venv/bin/gunicorn", "-b", "0.0.0.0:8000", "--chdir", "app/my_blog_site", "my_blog_site.wsgi:application"]
+# CMD ["/venv/bin/gunicorn", "-b", "0.0.0.0:8000", "my_blog_site.wsgi:application"]
 
 
 ENV PATH="/py/bin:$PATH"
