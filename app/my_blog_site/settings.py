@@ -49,6 +49,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'my_blog_site.urls'
@@ -79,14 +80,15 @@ WSGI_APPLICATION = 'my_blog_site.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'HOST': '10.9.2.148',
         'NAME': 'blog_site',
-        'USER': 'postgres',
+        'USER': 'postgres1',
         'PASSWORD': 'password',
-        'HOST': 'db',
-        'PORT': '5432', 
+        'PORT': '5432',
     }
 }
+
 
 
 # Password validation
@@ -123,14 +125,14 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 
 
 STATICFILES_DIRS = [
     BASE_DIR / "static"
 ]
 
-STATIC_ROOT = '/app/staticfiles/'
+STATIC_ROOT = 'staticfiles'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

@@ -25,7 +25,6 @@ RUN python -m venv /py && \
 
 # CMD ["/venv/bin/gunicorn", "-b", "0.0.0.0:8000", "my_blog_site.wsgi:application"]
 
-
 ENV PATH="/py/bin:$PATH"
 
 USER django-user
