@@ -4,10 +4,10 @@ from rest_framework import routers
 
 router = routers.DefaultRouter()
 
-urlpatterns = router.urls
 
-urlpatterns += [
-    path("home", views.StartingPage.as_view(), name="starting-page"),
+
+urlpatterns = [
+    path("", views.StartingPage.as_view(), name="starting-page"),
     path("posts", views.AllPosts.as_view(), name="posts-page"),
     path("posts/<slug:slug>", views.PostDetails.as_view(),
          name="posts-detail-page"),
@@ -19,3 +19,4 @@ urlpatterns += [
     path("updatepost/<int:pk>", views.UpdateBlogPostApiView.as_view(), name = "updatepost"),
     path("deletepost/<int:pk>", views.DeleteBlogPostApiView.as_view(), name = "deletepost")
 ]
+urlpatterns += router.urls

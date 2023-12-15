@@ -81,13 +81,14 @@ WSGI_APPLICATION = 'my_blog_site.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'HOST': '10.9.2.148',
+        'HOST': '/cloudsql/firstblog-407904:us-west1:blog-instance',
         'NAME': 'blog_site',
         'USER': 'postgres1',
         'PASSWORD': 'password',
         'PORT': '5432',
     }
 }
+
 
 
 
