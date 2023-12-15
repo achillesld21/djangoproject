@@ -80,14 +80,11 @@ WSGI_APPLICATION = 'my_blog_site.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'HOST': '10.9.2.148',
-        'NAME': 'blog_site',
-        'USER': 'postgres1',
-        'PASSWORD': 'password',
-        'PORT': '5432',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / "db.sqlite3",
     }
 }
+
 
 
 
