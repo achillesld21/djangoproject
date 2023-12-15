@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils.text import slugify
-
+from .storage import GoogleCloudStorage
 
 # Create your models here.
 class user(models.Model):

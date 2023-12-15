@@ -7,3 +7,5 @@ djangorestframework
 djangorestframework-jsonapi
 gunicorn
 whitenoise
+google-cloud-storage
+django-storages

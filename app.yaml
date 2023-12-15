@@ -1,5 +1,12 @@
 runtime: python39
-entrypoint: cd ./app && gunicorn -b :$PORT  my_blog_site.wsgi:application
+entrypoint: cd ./app &&
+            python manage.py wait_for_db &&
+            python manage.py migrate &&
+            python manage.py create_super_user &&
+            python manage.py loaddata initialdata.json &&
+            python manage.py makemigrations &&
+            python manage.py migrate &&
+            gunicorn -b :$PORT  my_blog_site.wsgi:application
 
 instance_class: F2
 

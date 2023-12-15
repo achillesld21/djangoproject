@@ -9,6 +9,13 @@ services:
     working_dir: /app
     environment:
       - CLOUDSDK_CONFIG=/creds
-
+    command: >
+      sh -c "python manage.py wait_for_db &&
+             python manage.py migrate &&
+             python manage.py create_super_user &&
+             python manage.py loaddata initialdata.json &&
+             python manage.py makemigrations &&
+             python manage.py migrate"
+             
 volumes:
   gcp-creds:

@@ -81,9 +81,9 @@ WSGI_APPLICATION = 'my_blog_site.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'HOST': '/cloudsql/firstblog-407904:us-west1:blog-instance',
+        'HOST': '/cloudsql/firstblog-407904:us-central1:blog-instance',
         'NAME': 'blog_site',
-        'USER': 'postgres1',
+        'USER': 'postgres',
         'PASSWORD': 'password',
         'PORT': '5432',
     }
@@ -146,3 +146,8 @@ MEDIA_URL = "/files/"
 FIXTURE_DIRS = [
     BASE_DIR / "blog/fixture"
 ]
+
+# settings.py
+
+DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
+GS_BUCKET_NAME = 'firstblog'
