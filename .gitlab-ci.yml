@@ -1,0 +1,20 @@
+stages:          # List of stages for jobs, and their order of execution
+  - test
+  - build
+  - deploy
+
+lint-test-job:   # This job also runs in the test stage.
+  stage: test    # It can run at the same time as unit-test-job (in parallel).
+  script:
+    - echo "Linting code... This will take about 10 seconds."
+    - docker-compose run --rm app sh -c "flake8"
+    - sleep 10
+    - echo "No lint issues found."
+
+build-job:       # This job runs in the build stage, which runs first.
+  stage: build
+  script:
+       - echo "Building the Docker image"
+       - docker-compose -f docker-compose-deploy.yml build
+       - sleep 2
+       - echo "Docker image build complete"
