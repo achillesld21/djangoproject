@@ -5,7 +5,6 @@ from django.views.generic import ListView
 from .forms import CreateBlog
 from django.views import View
 from my_blog_site.serializers import BlogSerializer
-from rest_framework.parsers import JSONParser
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -24,7 +23,7 @@ class AddPost(CreateView):
 
 class AddPostViewApi(APIView):
     queryset = blog_post.objects.all()
-    
+
     def post(self, request, *args, **kwargs):
         serializer = BlogSerializer(data=request.data)
         if serializer.is_valid():
@@ -35,7 +34,7 @@ class AddPostViewApi(APIView):
             serializer.save(slug=slug)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
+
 
 class StartingPage(ListView):
 
@@ -74,17 +73,18 @@ class PostDetails(View):
 #         if serializer.is_valid():
 #             serializer.save()
 #             return Response(serializer.data, status=status.HTTP_201_CREATED)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#         return Response(serializer.errors,
+# status=status.HTTP_400_BAD_REQUEST)
 
 
 class BlogList(generics.ListAPIView):
-    queryset =blog_post.objects.all()
+    queryset = blog_post.objects.all()
     serializer_class = BlogSerializer
 
 
 class CreateBlogPostApiView(generics.ListCreateAPIView):
     queryset = blog_post.objects.all()
-    serializer_class =BlogSerializer
+    serializer_class = BlogSerializer
     lookup_field = 'pk'
 
     def perform_create(self, serializer):
