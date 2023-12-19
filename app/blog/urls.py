@@ -1,17 +1,17 @@
 from django.urls import path
 from . import views
 from rest_framework import routers
+from django.contrib.auth.decorators import login_required
 
 router = routers.DefaultRouter()
 
 urlpatterns = router.urls
 
 urlpatterns += [
-    path("home", views.StartingPage.as_view(), name="starting-page"),
-    path("posts", views.AllPosts.as_view(), name="posts-page"),
-    path("posts/<slug:slug>", views.PostDetails.as_view(),
-         name="posts-detail-page"),
-    path("add-post", views.AddPost.as_view(), name="add-post"),
+    path("home", login_required(views.StartingPage.as_view(), login_url='login/login_user'), name='starting-page'),
+    path("posts", login_required(views.AllPosts.as_view(), login_url='login/login_user'), name='posts-page'),
+    path("posts/<slug:slug>", login_required(views.PostDetails.as_view(), login_url='login/login_user'), name='posts-detail-page'),
+    path("add-post", login_required(views.AddPost.as_view(), login_url='login/login_user'), name='add-post'),
     path("createpost", views.CreateBlogPostApiView.as_view(),
          name="createpost"),
     path("serial", views.BlogList.as_view(), name="serial-view"),
