@@ -5,6 +5,8 @@ from django.contrib.auth.forms import UserCreationForm
 from .forms import RegisterUserForm
 from blog import views
 
+
+
 def login_user(request):
 	if request.method == "POST":
 		username = request.POST['username']
@@ -24,7 +26,7 @@ def login_user(request):
 def logout_user(request):
 	logout(request)
 	messages.success(request, ("You Were Logged Out!"))
-	return redirect('home')
+	return redirect('starting-page')
 
 
 def register_user(request):
@@ -37,7 +39,7 @@ def register_user(request):
 			user = authenticate(username=username, password=password)
 			login(request, user)
 			messages.success(request, ("Registration Successful!"))
-			return redirect('blog:starting-page')
+			return redirect('login')
 	else:
 		form = RegisterUserForm()
 

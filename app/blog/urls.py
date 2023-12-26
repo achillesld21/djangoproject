@@ -14,6 +14,7 @@ urlpatterns += [
     path("add-post", login_required(views.AddPost.as_view(), login_url='login/login_user'), name='add-post'),
     path("createpost", views.CreateBlogPostApiView.as_view(),
          name="createpost"),
+    path('logout/', views.LogoutView.as_view(), name='logout'),
     path("serial", views.BlogList.as_view(), name="serial-view"),
     path("serial/<int:pk>/", views.ReadBlogPostApiView.as_view(),
          name="serial-number"),

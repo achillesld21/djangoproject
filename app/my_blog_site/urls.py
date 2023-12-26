@@ -23,7 +23,6 @@ from django.contrib.auth.decorators import login_required
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("", include("blog.urls")),
-    # path('home/', login_required( include("blog.urls"), login_url='login/login_user')),
     path('login/', include('django.contrib.auth.urls')),
     path('login/', include('login.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

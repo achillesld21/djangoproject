@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from .models import blog_post
 from django.views.generic.edit import CreateView
 from django.views.generic import ListView
@@ -10,6 +10,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import generics
 from django.utils.text import slugify
+from django.contrib.auth import logout
 
 
 # Create your views here.
@@ -59,6 +60,10 @@ class PostDetails(View):
         }
         return render(request, "blog/post-detail.html", context)
 
+class LogoutView(View):
+    def get(self, request):
+        logout(request)
+        return redirect('starting-page')
 
 # class BlogList(APIView):
 
