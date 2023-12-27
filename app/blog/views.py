@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from .models import blog_post
 from django.views.generic.edit import CreateView
-from django.views.generic import ListView
+from django.views.generic import ListView,TemplateView
 from .forms import CreateBlog
 from django.views import View
 from my_blog_site.serializers import BlogSerializer
@@ -11,15 +11,45 @@ from rest_framework import status
 from rest_framework import generics
 from django.utils.text import slugify
 from django.contrib.auth import logout
+import requests
 
 
 # Create your views here.
-class AddPost(CreateView):
-
-    model = blog_post
-    form_class = CreateBlog
+class AddPost(View):
     template_name = "blog/add-post.html"
-    success_url = "/home"
+
+    def get(self, request, *args, **kwargs):
+        form = CreateBlog()
+        return render(request, self.template_name, {'form': form})
+    
+    def post(self, request, *args, **kwargs):
+        form = CreateBlog(request.POST)
+        if form.is_valid():
+            category = form.cleaned_data['category']
+            heading = form.cleaned_data['heading']
+            content = form.cleaned_data['content']
+            image = form.cleaned_data['image']
+            user = form.cleaned_data['User']
+
+
+            # Send a POST request to the API with data as JSON
+            api_data = {
+                "category": category,
+                "heading": heading,
+                "content": content,
+                "image": image,
+                "User": user,      
+                "slug": None
+            }
+            headers = {'Content-Type': 'application/json'}  # Specify JSON content type
+            response = requests.post("http://0.0.0.0:8000/addpost", json=api_data, headers=headers)
+
+            if response.status_code == 201:
+                 return redirect('starting-page')
+            else:
+                return render(request, 'error.html', {'message': 'API request failed'})
+
+        return render(request, self.template_name, {'form': form})
 
 
 class AddPostViewApi(APIView):
@@ -37,19 +67,12 @@ class AddPostViewApi(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class StartingPage(ListView):
-
+class StartingPage(TemplateView):
     template_name = "blog/index.html"
-    model = blog_post
-    ordering = ["-posted_date"]
-    context_object_name = "posts"
 
 
-class AllPosts(ListView):
+class AllPosts(TemplateView):
     template_name = "blog/all-posts.html"
-    model = blog_post
-    ordering = ["-posted_date"]
-    context_object_name = "posts"
 
 
 class PostDetails(View):
