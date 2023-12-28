@@ -1,14 +1,14 @@
 from django.urls import path
 from . import views
 from rest_framework import routers
+from rest_framework.routers import DefaultRouter
 from django.contrib.auth.decorators import login_required
 
-router = routers.DefaultRouter()
+router = DefaultRouter()
 
-urlpatterns = router.urls
 
-urlpatterns += [
-    path("home", login_required(views.StartingPage.as_view(), login_url='login/login_user'), name='starting-page'),
+urlpatterns = [
+    path("", login_required(views.StartingPage.as_view(), login_url='login/login_user'), name='starting-page'),
     path("posts", login_required(views.AllPosts.as_view(), login_url='login/login_user'), name='posts-page'),
     path("posts/<slug:slug>", login_required(views.PostDetails.as_view(), login_url='login/login_user'), name='posts-detail-page'),
     path("add-post", login_required(views.AddPost.as_view(), login_url='login/login_user'), name='add-post'),
@@ -24,3 +24,5 @@ urlpatterns += [
     path("deletepost/<int:pk>", views.DeleteBlogPostApiView.as_view(),
          name="deletepost")
 ]
+
+# urlpatterns += router.urls

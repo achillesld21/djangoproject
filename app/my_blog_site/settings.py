@@ -32,6 +32,7 @@ ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
     'rest_framework',
+    'rest_framework_simplejwt',
     'blog',
     'login',
     'django.contrib.admin',
@@ -148,3 +149,9 @@ MEDIA_URL = "/files/"
 FIXTURE_DIRS = [
     BASE_DIR / "blog/fixture"
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}

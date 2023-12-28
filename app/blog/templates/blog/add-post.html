@@ -19,7 +19,7 @@
 {% endblock %}
 
 {% block script %}
-<script language="JavaScript">
+ <script language="JavaScript">
     $(document).ready(function() {
 
         $("form#data").submit(function(e) {
@@ -32,7 +32,7 @@
                 data: formData,
                 success: function (data) {
                     alert("Object added successfully");
-                    window.location = "http://0.0.0.0:8000/home";
+                    window.location = "http://0.0.0.0:8000/";
                     
                     
                 },

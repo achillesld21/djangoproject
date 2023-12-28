@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm
 from .forms import RegisterUserForm
 from blog import views
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 
@@ -14,6 +15,8 @@ def login_user(request):
 		user = authenticate(request, username=username, password=password)
 		if user is not None:
 			login(request, user)
+			refresh = RefreshToken.for_user(user)
+			access_token = str(refresh.access_token)
 			return redirect('starting-page')
 		else:
 			messages.success(request, ("There Was An Error Logging In, Try Again..."))	

@@ -6,5 +6,6 @@ django-extensions
 django-filter
 djangorestframework
 djangorestframework-jsonapi
+djangorestframework-simplejwt
 gunicorn
 whitenoise
