@@ -5,7 +5,8 @@ from django.contrib.auth.forms import UserCreationForm
 from .forms import RegisterUserForm
 from blog import views
 from rest_framework_simplejwt.tokens import RefreshToken
-
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 
 
 def login_user(request):
@@ -17,7 +18,10 @@ def login_user(request):
 			login(request, user)
 			refresh = RefreshToken.for_user(user)
 			access_token = str(refresh.access_token)
-			return redirect('starting-page')
+			redirect_url = reverse('starting-page')
+			response = HttpResponseRedirect(redirect_url)
+			response.set_cookie(key="jwt", value=access_token, httponly=True, max_age=3600)
+			return response
 		else:
 			messages.success(request, ("There Was An Error Logging In, Try Again..."))	
 			return redirect('login')	
@@ -29,7 +33,10 @@ def login_user(request):
 def logout_user(request):
 	logout(request)
 	messages.success(request, ("You Were Logged Out!"))
-	return redirect('starting-page')
+	redirect_url = reverse('login')
+	response = HttpResponseRedirect(redirect_url)
+	response.delete_cookie('jwt')
+	return response
 
 
 def register_user(request):

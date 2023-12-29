@@ -12,7 +12,9 @@ from rest_framework import generics
 from django.utils.text import slugify
 from django.contrib.auth import logout
 import requests
-
+from rest_framework.permissions import DjangoModelPermissions
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework import permissions
 
 # Create your views here.
 class AddPost(View):
@@ -111,6 +113,7 @@ class BlogList(generics.ListAPIView):
 
 
 class CreateBlogPostApiView(generics.ListCreateAPIView):
+
     queryset = blog_post.objects.all()
     serializer_class = BlogSerializer
     lookup_field = 'pk'
@@ -139,6 +142,8 @@ class UpdateBlogPostApiView(generics.RetrieveUpdateAPIView):
 
 
 class DeleteBlogPostApiView(generics.RetrieveDestroyAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [DjangoModelPermissions]
     queryset = blog_post.objects.all()
     serializer_class = BlogSerializer
     lookup_field = 'pk'
