@@ -9,6 +9,7 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 
 
+
 def login_user(request):
 	if request.method == "POST":
 		username = request.POST['username']
@@ -20,7 +21,7 @@ def login_user(request):
 			access_token = str(refresh.access_token)
 			redirect_url = reverse('starting-page')
 			response = HttpResponseRedirect(redirect_url)
-			response.set_cookie(key="jwt", value=access_token, httponly=True, max_age=3600)
+			response.set_cookie(key="jwt", value=access_token, httponly=False, max_age=3600)
 			return response
 		else:
 			messages.success(request, ("There Was An Error Logging In, Try Again..."))	
@@ -31,11 +32,11 @@ def login_user(request):
 		return render(request, 'login/login.html', {})
 
 def logout_user(request):
-	logout(request)
 	messages.success(request, ("You Were Logged Out!"))
 	redirect_url = reverse('login')
 	response = HttpResponseRedirect(redirect_url)
 	response.delete_cookie('jwt')
+	logout(request)
 	return response
 
 

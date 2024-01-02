@@ -12,17 +12,25 @@ from rest_framework import generics
 from django.utils.text import slugify
 from django.contrib.auth import logout
 import requests
-from rest_framework.permissions import DjangoModelPermissions
+from django.contrib import messages
+from rest_framework.permissions import IsAuthenticated,IsAdminUser
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework import permissions
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 
 # Create your views here.
+
+
 class AddPost(View):
     template_name = "blog/add-post.html"
 
     def get(self, request, *args, **kwargs):
+        token = request.COOKIES.get('jwt')
         form = CreateBlog()
-        return render(request, self.template_name, {'form': form})
+        return render(request, self.template_name, {
+            'form': form,
+            'token': token
+            })
     
     def post(self, request, *args, **kwargs):
         form = CreateBlog(request.POST)
@@ -55,8 +63,9 @@ class AddPost(View):
 
 
 class AddPostViewApi(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
     queryset = blog_post.objects.all()
-
     def post(self, request, *args, **kwargs):
         serializer = BlogSerializer(data=request.data)
         if serializer.is_valid():
@@ -87,8 +96,12 @@ class PostDetails(View):
 
 class LogoutView(View):
     def get(self, request):
+        messages.success(request, ("You Were Logged Out!"))
+        redirect_url = reverse('login')
+        response = HttpResponseRedirect(redirect_url)
+        response.delete_cookie('jwt')
         logout(request)
-        return redirect('starting-page')
+        return response
 
 # class BlogList(APIView):
 
@@ -110,10 +123,19 @@ class LogoutView(View):
 class BlogList(generics.ListAPIView):
     queryset = blog_post.objects.all()
     serializer_class = BlogSerializer
+    def get(self, request, *args, **kwargs):
+        auth_token = request.COOKIES.get('jwt')
+        if not auth_token:
+            return render(request, 'error.html', {'message': 'API request failed'})
+        else:
+            queryset = self.filter_queryset(self.get_queryset())
+            serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
 
 class CreateBlogPostApiView(generics.ListCreateAPIView):
-
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAdminUser]
     queryset = blog_post.objects.all()
     serializer_class = BlogSerializer
     lookup_field = 'pk'
@@ -129,8 +151,19 @@ class ReadBlogPostApiView(generics.RetrieveAPIView):
     serializer_class = BlogSerializer
     lookup_field = 'pk'
 
+    def get(self, request, *args, **kwargs):
+        auth_token = request.COOKIES.get('jwt')
+        if not auth_token:
+            return render(request, 'error.html', {'message': 'API request failed'})
+        else:
+            instance = self.get_object()
+            serializer = self.get_serializer(instance)
+            return Response(serializer.data)
+
 
 class UpdateBlogPostApiView(generics.RetrieveUpdateAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAdminUser]
     queryset = blog_post.objects.all()
     serializer_class = BlogSerializer
     lookup_field = 'pk'
@@ -143,7 +176,7 @@ class UpdateBlogPostApiView(generics.RetrieveUpdateAPIView):
 
 class DeleteBlogPostApiView(generics.RetrieveDestroyAPIView):
     authentication_classes = [JWTAuthentication]
-    permission_classes = [DjangoModelPermissions]
+    permission_classes = [IsAdminUser]
     queryset = blog_post.objects.all()
     serializer_class = BlogSerializer
     lookup_field = 'pk'

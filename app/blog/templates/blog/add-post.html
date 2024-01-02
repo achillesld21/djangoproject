@@ -30,6 +30,9 @@
                 url: $(this).attr('action'),
                 type: 'POST',
                 data: formData,
+                headers: {
+                    'Authorization': 'Bearer {{ token }}',
+                },
                 success: function (data) {
                     alert("Object added successfully");
                     window.location = "http://0.0.0.0:8000/";

@@ -34,4 +34,6 @@ function buildPage(data){
     container.appendChild(card);
 }
 
+console.log(document.cookie);
+
 document.addEventListener('DOMContentLoaded', getData);
