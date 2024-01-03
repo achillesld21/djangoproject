@@ -24,7 +24,7 @@ function buildPage(data){
     <div class="card__footer">
       <div class="user">
         <div class="user__info">
-          <h5>${data.User}</h5>
+          <h5>${data.username}</h5>
           <small>${data.posted_date}</small>
         </div>
       </div>

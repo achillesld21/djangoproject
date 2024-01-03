@@ -1,7 +1,6 @@
 from django.shortcuts import render, redirect
 from .models import blog_post
-from django.views.generic.edit import CreateView
-from django.views.generic import ListView,TemplateView
+from django.views.generic import TemplateView
 from .forms import CreateBlog
 from django.views import View
 from my_blog_site.serializers import BlogSerializer
@@ -15,8 +14,11 @@ import requests
 from django.contrib import messages
 from rest_framework.permissions import IsAuthenticated,IsAdminUser
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect,HttpResponse
 from django.urls import reverse
+from django.contrib.auth.mixins import UserPassesTestMixin
+from django.contrib.auth.decorators import user_passes_test
+
 
 # Create your views here.
 
@@ -25,42 +27,18 @@ class AddPost(View):
     template_name = "blog/add-post.html"
 
     def get(self, request, *args, **kwargs):
+        current_user = request.user
+        current_user_name = request.user.username
         token = request.COOKIES.get('jwt')
-        form = CreateBlog()
+        form = CreateBlog(User=current_user, Username=current_user_name)
         return render(request, self.template_name, {
             'form': form,
             'token': token
             })
     
     def post(self, request, *args, **kwargs):
-        form = CreateBlog(request.POST)
-        if form.is_valid():
-            category = form.cleaned_data['category']
-            heading = form.cleaned_data['heading']
-            content = form.cleaned_data['content']
-            image = form.cleaned_data['image']
-            user = form.cleaned_data['User']
-
-
-            # Send a POST request to the API with data as JSON
-            api_data = {
-                "category": category,
-                "heading": heading,
-                "content": content,
-                "image": image,
-                "User": user,      
-                "slug": None
-            }
-            headers = {'Content-Type': 'application/json'}  # Specify JSON content type
-            response = requests.post("http://0.0.0.0:8000/addpost", json=api_data, headers=headers)
-
-            if response.status_code == 201:
-                 return redirect('starting-page')
-            else:
-                return render(request, 'error.html', {'message': 'API request failed'})
-
-        return render(request, self.template_name, {'form': form})
-
+        pass
+        
 
 class AddPostViewApi(APIView):
     authentication_classes = [JWTAuthentication]
@@ -81,9 +59,25 @@ class AddPostViewApi(APIView):
 class StartingPage(TemplateView):
     template_name = "blog/index.html"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Add information about the current logged-in user to the context
+        context['current_user'] = self.request.user
+
+        return context
+
 
 class AllPosts(TemplateView):
     template_name = "blog/all-posts.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Add information about the current logged-in user to the context
+        context['current_user'] = self.request.user
+
+        return context
 
 
 class PostDetails(View):
@@ -133,7 +127,7 @@ class BlogList(generics.ListAPIView):
         return Response(serializer.data)
 
 
-class CreateBlogPostApiView(generics.ListCreateAPIView):
+class CreateBlogPostApiView(UserPassesTestMixin,generics.ListCreateAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAdminUser]
     queryset = blog_post.objects.all()
@@ -144,6 +138,12 @@ class CreateBlogPostApiView(generics.ListCreateAPIView):
         instance = serializer.save()
         if not instance.slug:
             instance.slug = slugify(instance.heading)
+    
+    def test_func(self):
+        return self.request.user.is_superuser
+    
+    def handle_no_permission(self):
+        return HttpResponse("You do not have permission to access this page.", status=403)
 
 
 class ReadBlogPostApiView(generics.RetrieveAPIView):
@@ -161,7 +161,7 @@ class ReadBlogPostApiView(generics.RetrieveAPIView):
             return Response(serializer.data)
 
 
-class UpdateBlogPostApiView(generics.RetrieveUpdateAPIView):
+class UpdateBlogPostApiView(UserPassesTestMixin,generics.RetrieveUpdateAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAdminUser]
     queryset = blog_post.objects.all()
@@ -173,10 +173,22 @@ class UpdateBlogPostApiView(generics.RetrieveUpdateAPIView):
         if not instance.slug:
             instance.slug = slugify(instance.heading)
 
+    def test_func(self):
+        return self.request.user.is_superuser
+    
+    def handle_no_permission(self):
+        return HttpResponse("You do not have permission to access this page.", status=403)
 
-class DeleteBlogPostApiView(generics.RetrieveDestroyAPIView):
+
+class DeleteBlogPostApiView(UserPassesTestMixin,generics.RetrieveDestroyAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAdminUser]
     queryset = blog_post.objects.all()
     serializer_class = BlogSerializer
     lookup_field = 'pk'
+
+    def test_func(self):
+        return self.request.user.is_superuser
+    
+    def handle_no_permission(self):
+        return HttpResponse("You do not have permission to access this page.", status=403)
