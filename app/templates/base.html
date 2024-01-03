@@ -20,12 +20,14 @@
           </a>
     
           <ul class="nav nav-pills">
-            <li class="nav-item"><a href="{% url "posts-page" %}" class="nav-link active" aria-current="page">All Posts</a></li>
+            <li class="nav-item"><a href="{% url "posts-page" %}" class="nav-link" aria-current="page">All Posts</a></li>
+            <li class="nav-item"><a href="{% url "logout" %}" class="nav-link active" aria-current="page">Log Out</a></li>
           </ul>
         </header>
       </div>
     
     {% block page_content %}{% endblock %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script> 
     {% block script %}{% endblock  %}
 </body>
 </html>

@@ -1,14 +1,5 @@
 [
   {
-      "model": "blog.user",
-      "pk": 1,
-      "fields": {
-          "first_name": "John",
-          "last_name": "Doe",
-          "email_address": "john.doe@example.com"
-      }
-  },
-  {
       "model": "blog.blog_post",
       "pk": 1,
       "fields": {
@@ -16,7 +7,7 @@
           "heading": "Introduction to Django",
           "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
           "image": "images/diavel.jpg",
-          "user": 1,      
+          "User": 1,      
           "posted_date": "2023-01-01",
           "slug": "introduction-to-django"
       }

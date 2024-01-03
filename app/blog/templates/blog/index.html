@@ -5,14 +5,11 @@
     MY BLOG
 {% endblock %}
 
-
-
 {% block css_file  %}
     <link rel="stylesheet" href="{% static "blog/index.css" %}">
 {% endblock %}
 
 {% block page_content %}
-
 <div class="b-example-divider"></div>
 
   <div class="container my-5">
@@ -30,16 +27,10 @@
       </div>
     </div>
   </div>
-
-
-
-<div class="container">
-
-  {% for post in posts %}
-    {% include "blog/includes/posts.html" %}
-  {% endfor %}
-
+<div class="container contain">
 </div>
-  <!-- partial -->
-
 {% endblock %}
+
+{% block script %}
+<script src={% static "blog/script.js" %}></script>
+{% endblock  %}

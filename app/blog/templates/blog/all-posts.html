@@ -9,13 +9,12 @@
 
 {% block page_content %}
 
-<div class="container">
-
-{% for post in posts %}
-    {% include "blog/includes/posts.html" %}
-{% endfor %}
-
+<div class="container contain">
 
 </div>
 
+
 {% endblock %}
+{% block script %}
+<script src={% static "blog/script.js" %}></script>
+{% endblock  %}

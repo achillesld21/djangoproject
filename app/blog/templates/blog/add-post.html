@@ -10,36 +10,40 @@
 
 {% block page_content %}
 <div class="container">
-<form action="" method="POST" enctype="multipart/form-data" id="myForm">
+<form method="POST" action="http://0.0.0.0:8000/addpost" enctype="multipart/form-data" id="data">
  {% csrf_token %}
 {{ form }}
-<button type="submit" class="btn btn-primary">Save</button>
+<button type="submit" id="submit" class="btn btn-primary"> Save </button>
 </form>
-
-
 </div>
-
 {% endblock %}
+
 {% block script %}
-<script>
-document.getElementById('myForm').addEventListener('submit', function(event) {
-        event.preventDefault();
-    
-        // Collect form data
-        const formData = new FormData(event.target);
-        (async () => {
-            try {
-                const res2 = fetch('http://localhost:8000/addpost', {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
-                    },
-                    body: formData
-                });
-            } catch (err) {
-                console.log(err);
-            }
-        })();
-}
+ <script language="JavaScript">
+    $(document).ready(function() {
+
+        $("form#data").submit(function(e) {
+            e.preventDefault();    
+            var formData = new FormData(this);
+        
+            $.ajax({
+                url: $(this).attr('action'),
+                type: 'POST',
+                data: formData,
+                headers: {
+                    'Authorization': 'Bearer {{ token }}',
+                },
+                success: function (data) {
+                    alert("Object added successfully");
+                    window.location = "http://0.0.0.0:8000/";
+                    
+                    
+                },
+                cache: false,
+                contentType: false,
+                processData: false
+            });
+        });
+    });
 </script>
 {% endblock  %}
