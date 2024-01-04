@@ -18,11 +18,26 @@
 {% block script %}
 <script>
     async function getData() {
-        const res = await fetch('http://0.0.0.0:8000/serial/{{ post.id }}');
-        const data = await res.json();        
-        buildPage(data);
-    }
+        const token = '{{ token }}';  // Replace with your actual authorization token
     
+        const headers = new Headers({
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+        });
+    
+        const requestOptions = {
+            method: 'GET',
+            headers: headers,
+        };
+    
+        try {
+            const res = await fetch('http://0.0.0.0:8000/serial/{{ post.id }}', requestOptions);
+            const data = await res.json();        
+            buildPage(data);
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    }
     function buildPage(data){
         const body = document.createElement('div');
         const container = document.querySelector('.contain');

@@ -16,8 +16,7 @@ from rest_framework.permissions import IsAuthenticated,IsAdminUser
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.http import HttpResponseRedirect,HttpResponse
 from django.urls import reverse
-from django.contrib.auth.mixins import UserPassesTestMixin
-from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.mixins import UserPassesTestMixin,AccessMixin
 
 
 # Create your views here.
@@ -27,10 +26,10 @@ class AddPost(View):
     template_name = "blog/add-post.html"
 
     def get(self, request, *args, **kwargs):
-        current_user = request.user
+        user = request.user
         current_user_name = request.user.username
         token = request.COOKIES.get('jwt')
-        form = CreateBlog(User=current_user, Username=current_user_name)
+        form = CreateBlog(User=user, Username=current_user_name)
         return render(request, self.template_name, {
             'form': form,
             'token': token
@@ -61,9 +60,12 @@ class StartingPage(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        request = self.request
+        user = self.request.user
+        context['current_user'] = user
 
-        # Add information about the current logged-in user to the context
-        context['current_user'] = self.request.user
+        token = request.COOKIES.get('jwt')
+        context['token'] = token
 
         return context
 
@@ -73,9 +75,12 @@ class AllPosts(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        request = self.request
+        user = self.request.user
+        context['current_user'] = user
 
-        # Add information about the current logged-in user to the context
-        context['current_user'] = self.request.user
+        token = request.COOKIES.get('jwt')
+        context['token'] = token
 
         return context
 
@@ -86,6 +91,13 @@ class PostDetails(View):
         context = {
             'post': post,
         }
+
+        user = self.request.user
+        context['current_user'] = user
+
+        token = request.COOKIES.get('jwt')
+        context['token'] = token
+        
         return render(request, "blog/post-detail.html", context)
 
 class LogoutView(View):
@@ -114,18 +126,19 @@ class LogoutView(View):
 # status=status.HTTP_400_BAD_REQUEST)
 
 
-class BlogList(generics.ListAPIView):
+class BlogList(AccessMixin,generics.ListAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
     queryset = blog_post.objects.all()
     serializer_class = BlogSerializer
-    def get(self, request, *args, **kwargs):
-        auth_token = request.COOKIES.get('jwt')
-        if not auth_token:
-            return render(request, 'error.html', {'message': 'API request failed'})
-        else:
-            queryset = self.filter_queryset(self.get_queryset())
-            serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
 
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return self.handle_no_permission()
+        return super().dispatch(request, *args, **kwargs)
+    
+    def handle_no_permission(self):
+        return HttpResponse("You do not have permission to access this page.", status=403)
 
 class CreateBlogPostApiView(UserPassesTestMixin,generics.ListCreateAPIView):
     authentication_classes = [JWTAuthentication]
@@ -146,19 +159,21 @@ class CreateBlogPostApiView(UserPassesTestMixin,generics.ListCreateAPIView):
         return HttpResponse("You do not have permission to access this page.", status=403)
 
 
-class ReadBlogPostApiView(generics.RetrieveAPIView):
+class ReadBlogPostApiView(AccessMixin,generics.RetrieveAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
     queryset = blog_post.objects.all()
     serializer_class = BlogSerializer
     lookup_field = 'pk'
 
-    def get(self, request, *args, **kwargs):
-        auth_token = request.COOKIES.get('jwt')
-        if not auth_token:
-            return render(request, 'error.html', {'message': 'API request failed'})
-        else:
-            instance = self.get_object()
-            serializer = self.get_serializer(instance)
-            return Response(serializer.data)
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return self.handle_no_permission()
+        return super().dispatch(request, *args, **kwargs)
+    
+    def handle_no_permission(self):
+        return HttpResponse("You do not have permission to access this page.", status=403)
+
 
 
 class UpdateBlogPostApiView(UserPassesTestMixin,generics.RetrieveUpdateAPIView):
