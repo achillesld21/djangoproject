@@ -21,7 +21,7 @@ def login_user(request):
 			access_token = str(refresh.access_token)
 			redirect_url = reverse('starting-page')
 			response = HttpResponseRedirect(redirect_url)
-			response.set_cookie(key="jwt", value=access_token, httponly=False, max_age=3600)
+			response.set_cookie(key="jwt", value=access_token, httponly=True, max_age=3600)
 			return response
 		else:
 			messages.success(request, ("There Was An Error Logging In, Try Again..."))	
