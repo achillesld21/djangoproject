@@ -17,6 +17,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.http import HttpResponseRedirect,HttpResponse
 from django.urls import reverse
 from django.contrib.auth.mixins import UserPassesTestMixin,AccessMixin
+from rest_framework_simplejwt.tokens import AccessToken
 
 
 # Create your views here.
@@ -109,22 +110,6 @@ class LogoutView(View):
         logout(request)
         return response
 
-# class BlogList(APIView):
-
-#     def get(self, request, format=None):
-#         blog = blog_post.objects.all()
-#         serializer = BlogSerializer(blog, many=True)
-#         return Response(serializer.data)
-
-#     def post(self, request, format=None):
-#         data = JSONParser().parse(request)
-#         serializer = BlogSerializer(data=data)
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(serializer.data, status=status.HTTP_201_CREATED)
-#         return Response(serializer.errors,
-# status=status.HTTP_400_BAD_REQUEST)
-
 
 class BlogList(AccessMixin,generics.ListAPIView):
     authentication_classes = [JWTAuthentication]
@@ -207,3 +192,19 @@ class DeleteBlogPostApiView(UserPassesTestMixin,generics.RetrieveDestroyAPIView)
     
     def handle_no_permission(self):
         return HttpResponse("You do not have permission to access this page.", status=403)
+    
+class TokenRefreshView(APIView):
+    def post(self, request, *args, **kwargs):
+        request = self.request
+        user = self.request.user
+        try:
+            refresh_token = RefreshToken.for_user(user)
+            print(refresh_token)
+            new_access_token = str(refresh_token.access_token)
+            response = HttpResponse("Cookie set successfully")
+            response.set_cookie(key="jwt", value=new_access_token, httponly=True, max_age=3600)
+            return response
+
+        except Exception as e:
+            print(f"Error refreshing token: {e}")
+            return Response({'error': 'Invalid or expired token'}, status=400)
