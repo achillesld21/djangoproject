@@ -180,19 +180,22 @@ class UpdateBlogPostApiView(UserPassesTestMixin,generics.RetrieveUpdateAPIView):
         return HttpResponse("You do not have permission to access this page.", status=403)
 
 
-class DeleteBlogPostApiView(UserPassesTestMixin,generics.RetrieveDestroyAPIView):
+class DeleteBlogPostApiView(AccessMixin,generics.DestroyAPIView):
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated]
     queryset = blog_post.objects.all()
     serializer_class = BlogSerializer
     lookup_field = 'pk'
 
-    def test_func(self):
-        return self.request.user.is_superuser
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return self.handle_no_permission()
+        return super().dispatch(request, *args, **kwargs)
     
     def handle_no_permission(self):
         return HttpResponse("You do not have permission to access this page.", status=403)
     
+
 class TokenRefreshView(APIView):
     def post(self, request, *args, **kwargs):
         request = self.request
@@ -209,6 +212,7 @@ class TokenRefreshView(APIView):
             print(f"Error refreshing token: {e}")
             return Response({'error': 'Invalid or expired token'}, status=400)
         
+
 class ProfileView(TemplateView):
     template_name = "blog/profile.html"
 
@@ -226,6 +230,7 @@ class ProfileView(TemplateView):
 
         return context
     
+
 class BlogListUser(AccessMixin,generics.ListAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
