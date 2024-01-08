@@ -23,8 +23,9 @@ urlpatterns = [
          name="updatepost"),
     path("deletepost/<int:pk>", views.DeleteBlogPostApiView.as_view(),
          name="deletepost"),
-    path("apirefresh", views.TokenRefreshView.as_view(),
-         name="refresh"),
+    path("profile/", views.ProfileView.as_view(),
+         name="profile"),
+    path("serial_user", views.BlogListUser.as_view(), name="serial-view-user"),
 ]
 
 # urlpatterns += router.urls

@@ -54,6 +54,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
+    'blog.middleware.TokenRefreshMiddleware',
 ]
 
 ROOT_URLCONF = 'my_blog_site.urls'

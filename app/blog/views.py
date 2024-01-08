@@ -208,3 +208,36 @@ class TokenRefreshView(APIView):
         except Exception as e:
             print(f"Error refreshing token: {e}")
             return Response({'error': 'Invalid or expired token'}, status=400)
+        
+class ProfileView(TemplateView):
+    template_name = "blog/profile.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        request = self.request
+        user = self.request.user
+        context['current_user'] = user.username
+        context['firstname'] = user.first_name
+        context['lastname'] = user.last_name
+        context['email'] = user.email
+
+        token = request.COOKIES.get('jwt')
+        context['token'] = token
+
+        return context
+    
+class BlogListUser(AccessMixin,generics.ListAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = BlogSerializer
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return self.handle_no_permission()
+        return super().dispatch(request, *args, **kwargs)
+    
+    def handle_no_permission(self):
+        return HttpResponse("You do not have permission to access this page.", status=403)
+    
+    def get_queryset(self):
+        return blog_post.objects.filter(User=self.request.user)

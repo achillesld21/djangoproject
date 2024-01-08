@@ -54,7 +54,7 @@
             buildPage(data);
         });
     } catch (error) {
-      const res = await fetch('http://0.0.0.0:8000/apirefresh', requestOptions);
+      console.error('Error fetching data:', error);
     }
   }
 
