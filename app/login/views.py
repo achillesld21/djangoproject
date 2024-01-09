@@ -43,12 +43,14 @@ class login_user(TemplateView):
 	template_name = "login/login.html"
 
 
-class UserLogoutview(APIView):
-	authentication_classes = [JWTAuthentication]
-	permission_classes = [IsAuthenticated]
-	def post(self, request, *args, **kwargs):
-		logout(request)
-		return Response({'Message': 'Logout successfull'}, status=status.HTTP_200_OK)
+class LogoutAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        logout(request)
+        request.auth.delete() 
+
+        return Response({'detail': 'Logout successful'}, status=status.HTTP_200_OK)
 
 
 def register_user(request):
