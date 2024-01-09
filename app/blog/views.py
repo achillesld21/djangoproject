@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import blog_post
-from django.views.generic import TemplateView,UpdateView
+from django.views.generic import TemplateView
 from .forms import CreateBlog
 from django.views import View
 from my_blog_site.serializers import BlogSerializer
@@ -30,11 +30,9 @@ class AddPost(View):
     def get(self, request, *args, **kwargs):
         user = request.user
         current_user_name = request.user.username
-        token = request.COOKIES.get('jwt')
         form = CreateBlog(User=user, Username=current_user_name)
         return render(request, self.template_name, {
             'form': form,
-            'token': token
             })
     
     def post(self, request, *args, **kwargs):
@@ -62,13 +60,8 @@ class StartingPage(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        request = self.request
         user = self.request.user
         context['current_user'] = user
-
-        token = request.COOKIES.get('jwt')
-        context['token'] = token
-
         return context
 
 
@@ -77,13 +70,8 @@ class AllPosts(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        request = self.request
         user = self.request.user
         context['current_user'] = user
-
-        token = request.COOKIES.get('jwt')
-        context['token'] = token
-
         return context
 
 
@@ -96,9 +84,6 @@ class PostDetails(View):
 
         user = self.request.user
         context['current_user'] = user
-
-        token = request.COOKIES.get('jwt')
-        context['token'] = token
         
         return render(request, "blog/post-detail.html", context)
 

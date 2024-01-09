@@ -32,7 +32,8 @@
     $(document).ready(function() {
 
         $("form#data").submit(function(e) {
-            e.preventDefault();    
+            e.preventDefault(); 
+            var token = localStorage.getItem('token');   
             var formData = new FormData(this);
         
             $.ajax({
@@ -40,7 +41,7 @@
                 type: 'POST',
                 data: formData,
                 headers: {
-                    'Authorization': 'Bearer {{ token }}',
+                    'Authorization': `Bearer ${token}`,
                 },
                 success: function (data) {
                     alert("Blog added successfully");

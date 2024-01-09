@@ -5,40 +5,50 @@ from django.contrib.auth.forms import UserCreationForm
 from .forms import RegisterUserForm
 from blog import views
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.http import HttpResponseRedirect
 from django.urls import reverse
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from my_blog_site.serializers import UserLoginSerializer
+from django.views.generic import TemplateView
+from rest_framework.permissions import AllowAny,IsAuthenticated
 
 
-
-def login_user(request):
-	if request.method == "POST":
-		username = request.POST['username']
-		password = request.POST['password']
-		user = authenticate(request, username=username, password=password)
+class UserLoginView(APIView):
+	authentication_classes = []  # An empty list means no authentication is required
+	permission_classes = [AllowAny]  # Allow any user, including unauthenticated ones
+	
+	def post(self, request, *args, **kwargs):
+		serializer = UserLoginSerializer(data=request.data)
+		serializer.is_valid(raise_exception=True)
+		username = serializer.validated_data['username']
+		password = serializer.validated_data['password']
+		user = authenticate(username=username, password=password)
+		
 		if user is not None:
 			login(request, user)
 			refresh = RefreshToken.for_user(user)
-			access_token = str(refresh.access_token)
-			request.session['refresh_token'] = str(refresh)
-			redirect_url = reverse('starting-page')
-			response = HttpResponseRedirect(redirect_url)
-			response.set_cookie(key="jwt", value=access_token, httponly=True, max_age=3600)
-			return response
+			return Response({
+				'access_token': str(refresh.access_token),
+				'refresh_token': str(refresh),
+				}, status=status.HTTP_200_OK)
 		else:
-			messages.success(request, ("There Was An Error Logging In, Try Again..."))	
-			return redirect('login')	
+			return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
 
-	else:
-		return render(request, 'login/login.html', {})
+class login_user(TemplateView):
 
-def logout_user(request):
-	messages.success(request, ("You Were Logged Out!"))
-	redirect_url = reverse('login')
-	response = HttpResponseRedirect(redirect_url)
-	response.delete_cookie('jwt')
-	logout(request)
-	return response
+	template_name = "login/login.html"
+
+
+class UserLogoutview(APIView):
+	authentication_classes = [JWTAuthentication]
+	permission_classes = [IsAuthenticated]
+	def post(self, request, *args, **kwargs):
+		logout(request)
+		return Response({'Message': 'Logout successfull'}, status=status.HTTP_200_OK)
 
 
 def register_user(request):

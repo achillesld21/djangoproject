@@ -27,7 +27,7 @@
 {% block script %}
 <script>
     async function getData() {
-        const token = '{{ token }}';  // Replace with your actual authorization token
+        var token = localStorage.getItem('token');
     
         const headers = new Headers({
             'Content-Type': 'application/json',

@@ -31,7 +31,7 @@
 {% block script %}
 <script>
     async function getData() {
-        const token = '{{ token }}';  // Replace with your actual authorization token
+        var token = localStorage.getItem('token');
     
         const headers = new Headers({
             'Content-Type': 'application/json',
@@ -97,6 +97,7 @@
     document.addEventListener('DOMContentLoaded', getData);
 
     $(document).ready(function() {
+        var token = localStorage.getItem('token');
         $(document).on('click','#delete', function(e) {
             console.log("click");
             var confirmed = window.confirm('Are you sure you want to delete this object?');
@@ -107,7 +108,7 @@
                     url: "http://0.0.0.0:8000/deletepost/{{post.id}}",
                     type: 'DELETE',
                     headers: {
-                        'Authorization': 'Bearer {{ token }}',
+                        'Authorization': `Bearer ${token}`,
                     },
                     success: function (data) {
                         alert("blog deleted successfully");
