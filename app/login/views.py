@@ -19,6 +19,7 @@ def login_user(request):
 			login(request, user)
 			refresh = RefreshToken.for_user(user)
 			access_token = str(refresh.access_token)
+			request.session['refresh_token'] = str(refresh)
 			redirect_url = reverse('starting-page')
 			response = HttpResponseRedirect(redirect_url)
 			response.set_cookie(key="jwt", value=access_token, httponly=True, max_age=3600)

@@ -22,7 +22,10 @@ urlpatterns = [
     path("updatepost/<int:pk>", views.UpdateBlogPostApiView.as_view(),
          name="updatepost"),
     path("deletepost/<int:pk>", views.DeleteBlogPostApiView.as_view(),
-         name="deletepost")
+         name="deletepost"),
+    path("profile/", views.ProfileView.as_view(),
+         name="profile"),
+    path("serial_user", views.BlogListUser.as_view(), name="serial-view-user"),
 ]
 
 # urlpatterns += router.urls

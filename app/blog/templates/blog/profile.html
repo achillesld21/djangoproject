@@ -1,20 +1,39 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block page_title %}ALL POSTS{% endblock %}
+{% block page_title %}BLOG_POST{% endblock %}
 
 {% block css_file  %}
     <link rel="stylesheet" href="{% static "blog/index.css" %}"/>
 {% endblock %}
 
 {% block page_content %}
-
+    <div class="container py-5 h-50 w-100">
+          <div class="card" style="border-radius: 15px;">
+            <div class="card-body p-4">
+              <div class="d-flex text-black">
+                <div class="ms-3">
+                  <h5 class="mb-1">{{current_user}}</h5>
+                  <p class="mb-2 pb-1" style="color: #2b2a2a;">{{firstname}} {{lastname}}</p>
+                  <div class="d-flex justify-content-start rounded-3 p-2 mb-2"
+                    style="background-color: #efefef;">
+                    <div>
+                      <p class="small text-muted mb-1">{{email}}</p>
+                    </div>
+                  </div>
+                  <div class="d-flex pt-1">
+                  </div>
+              </div>
+            </div>
+          </div>
+      </div>
+    </div>
 <div class="container contain">
-
+    
 </div>
 
-
 {% endblock %}
+
 {% block script %}
 <script>
     async function getData() {
@@ -31,24 +50,25 @@
         };
     
         try {
-            const res = await fetch('http://0.0.0.0:8000/serial', requestOptions);
-            const datas = await res.json();
-    
+            const res = await fetch('http://0.0.0.0:8000/serial_user', requestOptions);
+            const datas = await res.json();        
+            
             datas.forEach((data) => {
                 buildPage(data);
             });
+
         } catch (error) {
             console.error('Error fetching data:', error);
         }
-      }
-    
+    }
     function buildPage(data){
         const card = document.createElement('div');
         const container = document.querySelector('.contain');
     
         card.classList.add(`card`);
         card.innerHTML = `
-        <a href="posts/${data.slug}" style="text-decoration:none" >
+        </div>
+        <a href="/posts/${data.slug}" style="text-decoration:none" >
         <div class="card__header">
           <img src="${data.image}" alt="card__image"  class="card__image" width="600">
         </div>
