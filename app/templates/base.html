@@ -20,6 +20,7 @@
           </a>
     
           <ul class="nav nav-pills">
+            {% block back_url %}{% endblock %}
             <li class="nav-item"><a href="{% url "profile" %}" class="nav-link" aria-current="page">{{ current_user.username }}</a></li>
             <li class="nav-item"><a href="{% url "logout" %}" class="nav-link active" aria-current="page">Log Out</a></li>
           </ul>

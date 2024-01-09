@@ -1,6 +1,6 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from .models import blog_post
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView,UpdateView
 from .forms import CreateBlog
 from django.views import View
 from my_blog_site.serializers import BlogSerializer
@@ -18,6 +18,7 @@ from django.http import HttpResponseRedirect,HttpResponse
 from django.urls import reverse
 from django.contrib.auth.mixins import UserPassesTestMixin,AccessMixin
 from rest_framework_simplejwt.tokens import AccessToken
+from .forms import BlogPostForm
 
 
 # Create your views here.
@@ -161,9 +162,9 @@ class ReadBlogPostApiView(AccessMixin,generics.RetrieveAPIView):
 
 
 
-class UpdateBlogPostApiView(UserPassesTestMixin,generics.RetrieveUpdateAPIView):
+class UpdateBlogPostApiView(AccessMixin,generics.RetrieveUpdateAPIView):
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated]
     queryset = blog_post.objects.all()
     serializer_class = BlogSerializer
     lookup_field = 'pk'
@@ -173,8 +174,10 @@ class UpdateBlogPostApiView(UserPassesTestMixin,generics.RetrieveUpdateAPIView):
         if not instance.slug:
             instance.slug = slugify(instance.heading)
 
-    def test_func(self):
-        return self.request.user.is_superuser
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return self.handle_no_permission()
+        return super().dispatch(request, *args, **kwargs)
     
     def handle_no_permission(self):
         return HttpResponse("You do not have permission to access this page.", status=403)
@@ -246,3 +249,19 @@ class BlogListUser(AccessMixin,generics.ListAPIView):
     
     def get_queryset(self):
         return blog_post.objects.filter(User=self.request.user)
+    
+
+def edit_blog_post(request, pk):
+    post = get_object_or_404(blog_post, pk=pk)
+    token = request.COOKIES.get('jwt')
+
+
+    if request.method == 'POST':
+        form = BlogPostForm(request.POST, request.FILES, instance=post)
+        if form.is_valid():
+            form.save()
+            return redirect('blog_post_detail', slug=post.slug)
+    else:
+        form = BlogPostForm(instance=post)
+
+    return render(request, 'blog/edit-post.html', {'form': form, 'post': post, 'token': token})

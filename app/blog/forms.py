@@ -29,3 +29,14 @@ class CreateBlog(forms.ModelForm):
         if username:
             self.fields['username'].initial = username
             self.fields['username'].widget.attrs['readonly'] = True
+
+
+class BlogPostForm(forms.ModelForm):
+    class Meta:
+        model = blog_post
+        fields = ['category', 'heading', 'content', 'image']
+        widgets = {
+            'category': forms.TextInput(attrs={'class': 'form-control'}),
+            'heading': forms.TextInput(attrs={'class': 'form-control'}),
+            'content': forms.Textarea(attrs={'class': 'form-control'}),
+        }

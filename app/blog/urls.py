@@ -23,9 +23,10 @@ urlpatterns = [
          name="updatepost"),
     path("deletepost/<int:pk>", views.DeleteBlogPostApiView.as_view(),
          name="deletepost"),
-    path("profile/", views.ProfileView.as_view(),
+    path("profile/", login_required(views.ProfileView.as_view(), login_url='login/login_user'),
          name="profile"),
     path("serial_user", views.BlogListUser.as_view(), name="serial-view-user"),
+    path('edit/<int:pk>/', login_required(views.edit_blog_post, login_url='login/login_user'), name='edit_blog_post'),
 ]
 
 # urlpatterns += router.urls
