@@ -8,10 +8,10 @@ router = DefaultRouter()
 
 
 urlpatterns = [
-    path("", login_required(views.StartingPage.as_view(), login_url='login/login_user'), name='starting-page'),
-    path("posts", login_required(views.AllPosts.as_view(), login_url='login/login_user'), name='posts-page'),
-    path("posts/<slug:slug>", login_required(views.PostDetails.as_view(), login_url='login/login_user'), name='posts-detail-page'),
-    path("add-post", login_required(views.AddPost.as_view(), login_url='login/login_user'), name='add-post'),
+    path("", views.StartingPage.as_view(), name='starting-page'),
+    path("posts", views.AllPosts.as_view(), name='posts-page'),
+    path("posts/<slug:slug>", views.PostDetails.as_view(), name='posts-detail-page'),
+    path("add-post", views.AddPost.as_view() , name='add-post'),
     path("createpost", views.CreateBlogPostApiView.as_view(),
          name="createpost"),
     path('logout/', views.LogoutView.as_view(), name='logout'),
@@ -23,10 +23,11 @@ urlpatterns = [
          name="updatepost"),
     path("deletepost/<int:pk>", views.DeleteBlogPostApiView.as_view(),
          name="deletepost"),
-    path("profile/", login_required(views.ProfileView.as_view(), login_url='login/login_user'),
+    path("profile/", views.ProfileView.as_view()  ,
          name="profile"),
     path("serial_user", views.BlogListUser.as_view(), name="serial-view-user"),
-    path('edit/<int:pk>/', login_required(views.edit_blog_post, login_url='login/login_user'), name='edit_blog_post'),
+    path('edit/<int:pk>/', views.edit_blog_post   , name='edit_blog_post'),
+    path('get_user_from_token/', views.GetUserFromTokenView.as_view(), name='get_user_from_token'),
 ]
 
 # urlpatterns += router.urls

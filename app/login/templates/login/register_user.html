@@ -29,18 +29,109 @@
 	<div class="shadow p-4 mb-5 bg-body rounded">
 	<h1>Register</h1>
 <br/>
-		<form action="{% url 'register_user' %}" method=POST>
-			{% csrf_token %}
+<form method="POST" id="data" >
 
-			{{ form.as_p }}
-			
-<br/><br/>
-			<input type="submit" value="Submit" class="btn btn-secondary">
+<label for="id_username">Username:</label>
+<input type="text" name="username" maxlength="150" autofocus="" class="form-control" required="" id="id_username">
 
-		</form>
+<span class="helptext">Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.</span>
+
+
+</p>
+
+
+<p>
+<label for="id_first_name">First name:</label>
+<input type="text" name="first_name" class="form-control" maxlength="50" required="" id="id_first_name">
+
+
+</p>
+
+
+<p>
+<label for="id_last_name">Last name:</label>
+<input type="text" name="last_name" class="form-control" maxlength="50" required="" id="id_last_name">
+
+
+</p>
+
+
+<p>
+<label for="id_email">Email:</label>
+<input type="email" name="email" class="form-control" maxlength="320" required="" id="id_email">
+
+
+</p>
+
+
+<p>
+<label for="id_password">Password:</label>
+<input type="password" name="password" autocomplete="new-password" class="form-control" required="" id="id_password">
+
+<span class="helptext"></span></p><ul><li>Your password can’t be too similar to your other personal information.</li><li>Your password must contain at least 8 characters.</li><li>Your password can’t be a commonly used password.</li><li>Your password can’t be entirely numeric.</li></ul>
+
+
+<p></p>
+
+
+<p>
+<label for="id_password2">Password confirmation:</label>
+<input type="password" name="password2" autocomplete="new-password" class="form-control" required="" id="id_password2">
+
+<span class="helptext">Enter the same password as before, for verification.</span>
+
+
+
+
+</p>
+	
+<br><br>
+	<input type="submit" value="Submit" class="btn btn-secondary">
+
+</form>
 		
 </div>
 <br/><br/>	
 </div>
 
 {% endblock %}
+{% block script %}
+<script language="JavaScript">
+		function getCSRFToken() {
+			const cookies = document.cookie.split(';');
+			for (const cookie of cookies) {
+				const [name, value] = cookie.trim().split('=');
+				if (name === 'csrftoken') {
+					return value;
+				}
+			}
+			return null;
+		}
+		$(document).ready(function() {
+	
+			$("form#data").submit(function(e) {
+				e.preventDefault(); 
+				var token = localStorage.getItem('token');   
+				var formData = new FormData(this);
+			
+				$.ajax({
+					url: '{% url 'register_user_api' %}',
+					type: 'POST',
+					data: formData,
+					beforeSend: function (xhr) {
+						xhr.setRequestHeader('X-CSRFToken', getCSRFToken());
+					  },
+					success: function (data) {
+						alert("Blog added successfully");
+						window.location = "http://0.0.0.0:8000/login/login_user";
+						
+						
+					},
+					cache: false,
+					contentType: false,
+					processData: false
+				});
+			});
+		});
+</script>
+{% endblock  %}

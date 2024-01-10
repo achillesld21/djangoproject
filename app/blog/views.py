@@ -13,52 +13,64 @@ from django.contrib.auth import logout
 import requests
 from django.contrib import messages
 from rest_framework.permissions import IsAuthenticated,IsAdminUser
-from rest_framework_simplejwt.authentication import JWTAuthentication
+from .authentication import JWTAuthentication
 from django.http import HttpResponseRedirect,HttpResponse
 from django.urls import reverse
 from django.contrib.auth.mixins import UserPassesTestMixin,AccessMixin
 from rest_framework_simplejwt.tokens import AccessToken
 from .forms import BlogPostForm
+import jwt
+from django.conf import settings
 
 
-# Create your views here.
+# Views are listed here.
 
 
-class AddPost(View):
+# View for rendering the add-post.html page
+class AddPost(TemplateView):
     template_name = "blog/add-post.html"
-
-    def get(self, request, *args, **kwargs):
-        user = request.user
-        current_user_name = request.user.username
-        form = CreateBlog(User=user, Username=current_user_name)
-        return render(request, self.template_name, {
-            'form': form,
-            })
-    
-    def post(self, request, *args, **kwargs):
-        pass
         
 
 class AddPostViewApi(APIView):
+    """
+    API view for adding a new blog post.
+    Requires JWT authentication and permission from authenticated users.
+    """
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     queryset = blog_post.objects.all()
+
     def post(self, request, *args, **kwargs):
+        # Deserialize the request data using the BlogSerializer
         serializer = BlogSerializer(data=request.data)
+
+        # Check if the data is valid
         if serializer.is_valid():
             heading = serializer.validated_data.get('heading')
             slug = serializer.validated_data.get('slug') or None
+
+            # Generate a slug if not provided in the request
             if slug is None:
                 slug = slugify(heading)
+
+            # Save the serialized data to create a new blog post
             serializer.save(slug=slug)
+
+            # Return a success response with the serialized data
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        # Return an error response with serializer errors
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class StartingPage(TemplateView):
+    """
+    View for rendering the starting page.
+    """
     template_name = "blog/index.html"
 
     def get_context_data(self, **kwargs):
+        # Add the current user to the context data
         context = super().get_context_data(**kwargs)
         user = self.request.user
         context['current_user'] = user
@@ -66,52 +78,62 @@ class StartingPage(TemplateView):
 
 
 class AllPosts(TemplateView):
+    """
+    View for rendering a page displaying all blog posts.
+    """
     template_name = "blog/all-posts.html"
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        user = self.request.user
-        context['current_user'] = user
-        return context
 
 
 class PostDetails(View):
+    """
+    View for displaying details of a specific blog post.
+    """
     def get(self, request, slug):
+        # Retrieve the blog post using the provided slug
         post = blog_post.objects.get(slug=slug)
+
+        # Create a context with the post and current user information
         context = {
             'post': post,
         }
-
         user = self.request.user
         context['current_user'] = user
         
+        # Render the template with the context data
         return render(request, "blog/post-detail.html", context)
 
+
 class LogoutView(View):
+    """
+    View for handling user logout.
+    """
     def get(self, request):
+        # Display a success message and redirect to the login page after logging out
         messages.success(request, ("You Were Logged Out!"))
         redirect_url = reverse('login')
         response = HttpResponseRedirect(redirect_url)
-        response.delete_cookie('jwt')
+        response.delete_cookie('jwt')  # Delete the JWT cookie
         logout(request)
         return response
 
 
-class BlogList(AccessMixin,generics.ListAPIView):
+class BlogList(generics.ListAPIView):
+    """
+    API view for listing all blog posts.
+    Requires JWT authentication and permission from authenticated users.
+    """
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     queryset = blog_post.objects.all()
     serializer_class = BlogSerializer
 
-    def dispatch(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return self.handle_no_permission()
-        return super().dispatch(request, *args, **kwargs)
-    
-    def handle_no_permission(self):
-        return HttpResponse("You do not have permission to access this page.", status=403)
 
-class CreateBlogPostApiView(UserPassesTestMixin,generics.ListCreateAPIView):
+class CreateBlogPostApiView(generics.ListCreateAPIView):
+    """
+    API view for creating a new blog post.
+    Requires JWT authentication and admin user permission.
+    """
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAdminUser]
     queryset = blog_post.objects.all()
@@ -119,35 +141,29 @@ class CreateBlogPostApiView(UserPassesTestMixin,generics.ListCreateAPIView):
     lookup_field = 'pk'
 
     def perform_create(self, serializer):
+        # Set the slug using the heading if not provided in the request
         instance = serializer.save()
         if not instance.slug:
             instance.slug = slugify(instance.heading)
-    
-    def test_func(self):
-        return self.request.user.is_superuser
-    
-    def handle_no_permission(self):
-        return HttpResponse("You do not have permission to access this page.", status=403)
 
 
-class ReadBlogPostApiView(AccessMixin,generics.RetrieveAPIView):
+class ReadBlogPostApiView(generics.RetrieveAPIView):
+    """
+    API view for reading details of a specific blog post.
+    Requires JWT authentication and permission from authenticated users.
+    """
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     queryset = blog_post.objects.all()
     serializer_class = BlogSerializer
     lookup_field = 'pk'
 
-    def dispatch(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return self.handle_no_permission()
-        return super().dispatch(request, *args, **kwargs)
-    
-    def handle_no_permission(self):
-        return HttpResponse("You do not have permission to access this page.", status=403)
 
-
-
-class UpdateBlogPostApiView(AccessMixin,generics.RetrieveUpdateAPIView):
+class UpdateBlogPostApiView(generics.RetrieveUpdateAPIView):
+    """
+    API view for updating details of a specific blog post.
+    Requires JWT authentication and permission from authenticated users.
+    """
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     queryset = blog_post.objects.all()
@@ -155,42 +171,34 @@ class UpdateBlogPostApiView(AccessMixin,generics.RetrieveUpdateAPIView):
     lookup_field = 'pk'
 
     def perform_update(self, serializer):
+        # Set the slug using the heading if not provided in the request
         instance = serializer.save()
         if not instance.slug:
             instance.slug = slugify(instance.heading)
 
-    def dispatch(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return self.handle_no_permission()
-        return super().dispatch(request, *args, **kwargs)
-    
-    def handle_no_permission(self):
-        return HttpResponse("You do not have permission to access this page.", status=403)
 
-
-class DeleteBlogPostApiView(AccessMixin,generics.DestroyAPIView):
+class DeleteBlogPostApiView(AccessMixin, generics.DestroyAPIView):
+    """
+    API view for deleting a specific blog post.
+    Requires JWT authentication and permission from authenticated users.
+    """
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     queryset = blog_post.objects.all()
     serializer_class = BlogSerializer
     lookup_field = 'pk'
 
-    def dispatch(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return self.handle_no_permission()
-        return super().dispatch(request, *args, **kwargs)
-    
-    def handle_no_permission(self):
-        return HttpResponse("You do not have permission to access this page.", status=403)
-    
 
 class TokenRefreshView(APIView):
+    """
+    API view for refreshing the JWT access token.
+    """
     def post(self, request, *args, **kwargs):
+        # Refresh the JWT access token and set the new token in a cookie
         request = self.request
         user = self.request.user
         try:
             refresh_token = RefreshToken.for_user(user)
-            print(refresh_token)
             new_access_token = str(refresh_token.access_token)
             response = HttpResponse("Cookie set successfully")
             response.set_cookie(key="jwt", value=new_access_token, httponly=True, max_age=3600)
@@ -199,54 +207,90 @@ class TokenRefreshView(APIView):
         except Exception as e:
             print(f"Error refreshing token: {e}")
             return Response({'error': 'Invalid or expired token'}, status=400)
-        
+
 
 class ProfileView(TemplateView):
+    """
+    View for rendering the user profile page.
+    """
     template_name = "blog/profile.html"
 
     def get_context_data(self, **kwargs):
+        # Add user and token information to the context data
         context = super().get_context_data(**kwargs)
-        request = self.request
         user = self.request.user
         context['current_user'] = user.username
         context['firstname'] = user.first_name
         context['lastname'] = user.last_name
         context['email'] = user.email
 
-        token = request.COOKIES.get('jwt')
-        context['token'] = token
-
         return context
-    
 
-class BlogListUser(AccessMixin,generics.ListAPIView):
+
+class BlogListUser(generics.ListAPIView):
+    """
+    API view for listing blog posts of the current user.
+    Requires JWT authentication and permission from authenticated users.
+    """
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     serializer_class = BlogSerializer
 
-    def dispatch(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return self.handle_no_permission()
-        return super().dispatch(request, *args, **kwargs)
-    
-    def handle_no_permission(self):
-        return HttpResponse("You do not have permission to access this page.", status=403)
     
     def get_queryset(self):
+        # Return the queryset of blog posts belonging to the current user
         return blog_post.objects.filter(User=self.request.user)
-    
+
 
 def edit_blog_post(request, pk):
+    """
+    View for editing a specific blog post.
+    """
     post = get_object_or_404(blog_post, pk=pk)
-    token = request.COOKIES.get('jwt')
-
 
     if request.method == 'POST':
+        # Process the form submission for editing the blog post
         form = BlogPostForm(request.POST, request.FILES, instance=post)
         if form.is_valid():
             form.save()
             return redirect('blog_post_detail', slug=post.slug)
     else:
+        # Display the form for editing the blog post
         form = BlogPostForm(instance=post)
 
-    return render(request, 'blog/edit-post.html', {'form': form, 'post': post, 'token': token})
+    return render(request, 'blog/edit-post.html', {'form': form, 'post': post})
+
+
+class GetUserFromTokenView(APIView):
+
+    authentication_classes = []
+    permission_classes = []
+
+    def get(self, request, *args, **kwargs):
+        # Get the JWT from the Authorization header
+        authorization_header = request.headers.get('Authorization', '')
+        if not authorization_header.startswith('Bearer '):
+            return Response({'error': 'Invalid authorization header'}, status=status.HTTP_400_BAD_REQUEST)
+
+        token = authorization_header.split(' ')[1]
+
+        try:
+            # Decode the token's payload
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+
+            # Assuming the user ID is stored in the 'user_id' claim
+            user_id = payload.get('user_id')
+            user_name = payload.get('user_name')
+
+            if user_id is not None:
+                return Response({
+                    'user_id': user_id,
+                    'user_name': user_name
+                 }, status=status.HTTP_200_OK)
+            else:
+                return Response({'error': 'Invalid or expired token'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        except jwt.ExpiredSignatureError:
+            return Response({'error': 'Token has expired'}, status=status.HTTP_401_UNAUTHORIZED)
+        except jwt.InvalidTokenError:
+            return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)

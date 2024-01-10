@@ -9,3 +9,4 @@ djangorestframework-jsonapi
 djangorestframework-simplejwt
 gunicorn
 whitenoise
+PyJWT
