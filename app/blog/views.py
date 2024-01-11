@@ -1,7 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import blog_post
 from django.views.generic import TemplateView
-from .forms import CreateBlog
 from django.views import View
 from my_blog_site.serializers import BlogSerializer
 from rest_framework.views import APIView
@@ -10,13 +9,12 @@ from rest_framework import status
 from rest_framework import generics
 from django.utils.text import slugify
 from django.contrib.auth import logout
-import requests
+from django.contrib.auth.models import User
 from django.contrib import messages
 from rest_framework.permissions import IsAuthenticated,IsAdminUser
 from .authentication import JWTAuthentication
-from django.http import HttpResponseRedirect,HttpResponse
+from django.http import HttpResponseRedirect
 from django.urls import reverse
-from django.contrib.auth.mixins import AccessMixin
 from .forms import BlogPostForm
 import jwt
 from django.conf import settings
@@ -251,3 +249,29 @@ class GetUserFromTokenView(APIView):
         except jwt.InvalidTokenError:
             # Return an error response for an invalid token
             return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
+        
+
+class GetUserDetailsView(APIView):
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, user_id, *args, **kwargs):
+        try:
+            # Retrieve the user object using the provided user ID
+            user = User.objects.get(id=user_id)
+
+            # Serialize the user object to include desired details
+            user_data = {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                # Add any other fields you want to include
+            }
+
+            return Response(user_data, status=status.HTTP_200_OK)
+
+        except User.DoesNotExist:
+            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)

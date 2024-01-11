@@ -50,4 +50,8 @@ urlpatterns = [
 
     # Get user information from a token using API
     path('get_user_from_token/', views.GetUserFromTokenView.as_view(), name='get_user_from_token'),
+
+    # Get user information from a user id given using API
+    path('get_user_details/<int:user_id>/', views.GetUserDetailsView.as_view(), name='get_user_details'),
+
 ]
