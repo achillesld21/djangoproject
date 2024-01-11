@@ -3,10 +3,10 @@ from django.utils.text import slugify
 from django.contrib.auth.models import User
 
 
-# Create your models here.
-
-
 class blog_post(models.Model):
+    """
+    Model representing a blog post.
+    """
     category = models.CharField(max_length=20)
     heading = models.CharField(max_length=50)
     content = models.TextField()
@@ -19,6 +19,15 @@ class blog_post(models.Model):
     slug = models.SlugField(db_index=True, null=True)
 
     def save(self, *args, **kwargs):
+        """
+        Override the save method to automatically generate a slug based on the heading.
+        """
         self.slug = slugify(self.heading)
-
         super().save(*args, **kwargs)
+
+    def __str__(self):
+        """
+        Return a string representation of the blog post.
+        """
+        return self.heading
+

@@ -23,6 +23,7 @@ $(document).ready(function() {
                 },
                 success: function (data) {
                   $("a#user").html(data.user_name);
+                  localStorage.setItem('user_id', data.user_id);
                     
                 },
                 cache: false,

@@ -45,6 +45,10 @@
        
          
          <input type="file" name="image" accept="image/*" id="id_image">
+
+         <input type="hidden" name="User" value="2" class="form-control-file" readonly="" id="id_User">
+
+         <input type="hidden" name="username" value="aswin" class="form-control-file" readonly="" id="id_username">
          
        
      
@@ -54,32 +58,6 @@
 {% endblock %}
 
 {% block script %}
- <script language="JavaScript">
-    $(document).ready(function() {
-
-        $("form#data").submit(function(e) {
-            e.preventDefault(); 
-            var token = localStorage.getItem('token');   
-            var formData = new FormData(this);
-        
-            $.ajax({
-                url: $(this).attr('action'),
-                type: 'POST',
-                data: formData,
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
-                success: function (data) {
-                    alert("Blog added successfully");
-                    window.location = "http://0.0.0.0:8000/";
-                    
-                    
-                },
-                cache: false,
-                contentType: false,
-                processData: false
-            });
-        });
-    });
-</script>
+<script src="{% static "blog/userdetails.js" %}"></script>
+ <script src="{% static "blog/addpost.js" %}"></script>
 {% endblock  %}

@@ -16,8 +16,7 @@ from rest_framework.permissions import IsAuthenticated,IsAdminUser
 from .authentication import JWTAuthentication
 from django.http import HttpResponseRedirect,HttpResponse
 from django.urls import reverse
-from django.contrib.auth.mixins import UserPassesTestMixin,AccessMixin
-from rest_framework_simplejwt.tokens import AccessToken
+from django.contrib.auth.mixins import AccessMixin
 from .forms import BlogPostForm
 import jwt
 from django.conf import settings
@@ -69,13 +68,6 @@ class StartingPage(TemplateView):
     """
     template_name = "blog/index.html"
 
-    def get_context_data(self, **kwargs):
-        # Add the current user to the context data
-        context = super().get_context_data(**kwargs)
-        user = self.request.user
-        context['current_user'] = user
-        return context
-
 
 class AllPosts(TemplateView):
     """
@@ -90,18 +82,8 @@ class PostDetails(View):
     View for displaying details of a specific blog post.
     """
     def get(self, request, slug):
-        # Retrieve the blog post using the provided slug
-        post = blog_post.objects.get(slug=slug)
-
-        # Create a context with the post and current user information
-        context = {
-            'post': post,
-        }
-        user = self.request.user
-        context['current_user'] = user
-        
         # Render the template with the context data
-        return render(request, "blog/post-detail.html", context)
+        return render(request, "blog/post-detail.html")
 
 
 class LogoutView(View):
@@ -156,7 +138,7 @@ class ReadBlogPostApiView(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated]
     queryset = blog_post.objects.all()
     serializer_class = BlogSerializer
-    lookup_field = 'pk'
+    lookup_field = 'slug'
 
 
 class UpdateBlogPostApiView(generics.RetrieveUpdateAPIView):
@@ -177,7 +159,7 @@ class UpdateBlogPostApiView(generics.RetrieveUpdateAPIView):
             instance.slug = slugify(instance.heading)
 
 
-class DeleteBlogPostApiView(AccessMixin, generics.DestroyAPIView):
+class DeleteBlogPostApiView(generics.DestroyAPIView):
     """
     API view for deleting a specific blog post.
     Requires JWT authentication and permission from authenticated users.
@@ -189,42 +171,11 @@ class DeleteBlogPostApiView(AccessMixin, generics.DestroyAPIView):
     lookup_field = 'pk'
 
 
-class TokenRefreshView(APIView):
-    """
-    API view for refreshing the JWT access token.
-    """
-    def post(self, request, *args, **kwargs):
-        # Refresh the JWT access token and set the new token in a cookie
-        request = self.request
-        user = self.request.user
-        try:
-            refresh_token = RefreshToken.for_user(user)
-            new_access_token = str(refresh_token.access_token)
-            response = HttpResponse("Cookie set successfully")
-            response.set_cookie(key="jwt", value=new_access_token, httponly=True, max_age=3600)
-            return response
-
-        except Exception as e:
-            print(f"Error refreshing token: {e}")
-            return Response({'error': 'Invalid or expired token'}, status=400)
-
-
 class ProfileView(TemplateView):
     """
     View for rendering the user profile page.
     """
     template_name = "blog/profile.html"
-
-    def get_context_data(self, **kwargs):
-        # Add user and token information to the context data
-        context = super().get_context_data(**kwargs)
-        user = self.request.user
-        context['current_user'] = user.username
-        context['firstname'] = user.first_name
-        context['lastname'] = user.last_name
-        context['email'] = user.email
-
-        return context
 
 
 class BlogListUser(generics.ListAPIView):
@@ -262,7 +213,9 @@ def edit_blog_post(request, pk):
 
 
 class GetUserFromTokenView(APIView):
-
+    """
+    API view for retrieving user information from a JWT token.
+    """
     authentication_classes = []
     permission_classes = []
 
@@ -278,19 +231,23 @@ class GetUserFromTokenView(APIView):
             # Decode the token's payload
             payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
 
-            # Assuming the user ID is stored in the 'user_id' claim
+            # Assuming the user ID and username are stored in the payload
             user_id = payload.get('user_id')
             user_name = payload.get('user_name')
 
             if user_id is not None:
+                # Return user information in the response
                 return Response({
                     'user_id': user_id,
                     'user_name': user_name
                  }, status=status.HTTP_200_OK)
             else:
+                # Return an error response for invalid or expired token
                 return Response({'error': 'Invalid or expired token'}, status=status.HTTP_401_UNAUTHORIZED)
 
         except jwt.ExpiredSignatureError:
+            # Return an error response for an expired token
             return Response({'error': 'Token has expired'}, status=status.HTTP_401_UNAUTHORIZED)
         except jwt.InvalidTokenError:
+            # Return an error response for an invalid token
             return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)

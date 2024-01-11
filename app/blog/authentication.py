@@ -1,37 +1,47 @@
 import jwt
 from rest_framework.authentication import BaseAuthentication
-from django.middleware.csrf import CsrfViewMiddleware
 from rest_framework import exceptions
 from django.conf import settings
 from django.contrib.auth import get_user_model
 
 
-
-
 class JWTAuthentication(BaseAuthentication):
-
+    """
+    Custom authentication class for JWT tokens.
+    """
     def authenticate(self, request):
+        # Retrieve the user model
+        user_model = get_user_model()
 
-        user1 = get_user_model()
-        authorization_heaader = request.headers.get('Authorization')
+        # Get the Authorization header from the request
+        authorization_header = request.headers.get('Authorization')
 
-        if not authorization_heaader:
+        # Check if the Authorization header is present
+        if not authorization_header:
             return None
+
         try:
-            access_token = authorization_heaader.split(' ')[1]
-            payload = jwt.decode(
-                access_token, settings.SECRET_KEY, algorithms=['HS256'])
+            # Extract the access token from the Authorization header
+            access_token = authorization_header.split(' ')[1]
+
+            # Decode the access token's payload
+            payload = jwt.decode(access_token, settings.SECRET_KEY, algorithms=['HS256'])
 
         except jwt.ExpiredSignatureError:
-            raise exceptions.AuthenticationFailed('access_token expired')
+            # Raise an exception for an expired access token
+            raise exceptions.AuthenticationFailed('Access token expired')
         except IndexError:
+            # Raise an exception if the token prefix is missing
             raise exceptions.AuthenticationFailed('Token prefix missing')
 
-        user = user1.objects.filter(id=payload['user_id']).first()
+        # Retrieve the user from the user model using the decoded user ID
+        user = user_model.objects.filter(id=payload['user_id']).first()
+
+        # Check if the user exists and is active
         if user is None:
             raise exceptions.AuthenticationFailed('User not found')
-
         if not user.is_active:
-            raise exceptions.AuthenticationFailed('user is inactive')
+            raise exceptions.AuthenticationFailed('User is inactive')
 
+        # Return the authenticated user and None for the credentials
         return (user, None)
