@@ -21,9 +21,6 @@ urlpatterns = [
     # Create a new post using API
     path("createpost", views.CreateBlogPostApiView.as_view(), name="createpost"),
 
-    # Logout view
-    path('logout/', views.LogoutView.as_view(), name='logout'),
-
     # View all posts using Django Rest Framework's ListAPIView
     path("serial", views.BlogList.as_view(), name="serial-view"),
 

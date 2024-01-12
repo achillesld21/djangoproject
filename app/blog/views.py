@@ -38,7 +38,20 @@ class AddPostViewApi(APIView):
     queryset = blog_post.objects.all()
 
     def post(self, request, *args, **kwargs):
-        # Deserialize the request data using the BlogSerializer
+        """
+        Create a new blog post.
+
+        Parameters:
+        request (HttpRequest): The incoming request.
+
+        Returns:
+        Response: A response containing the created blog post data.
+
+        Raises:
+        ValidationError: If the request data is not valid.
+
+        """
+
         serializer = BlogSerializer(data=request.data)
 
         # Check if the data is valid
@@ -79,23 +92,19 @@ class PostDetails(View):
     """
     View for displaying details of a specific blog post.
     """
-    def get(self, request, slug):
-        # Render the template with the context data
-        return render(request, "blog/post-detail.html")
-
-
-class LogoutView(View):
+def get(self, request, slug):
     """
-    View for handling user logout.
+    View for displaying details of a specific blog post.
+
+    Parameters:
+    request (HttpRequest): The incoming request.
+    slug (str): The unique slug of the blog post.
+
+    Returns:
+    HttpResponse: The response containing the rendered template.
     """
-    def get(self, request):
-        # Display a success message and redirect to the login page after logging out
-        messages.success(request, ("You Were Logged Out!"))
-        redirect_url = reverse('login')
-        response = HttpResponseRedirect(redirect_url)
-        response.delete_cookie('jwt')  # Delete the JWT cookie
-        logout(request)
-        return response
+    # Render the template with the context data
+    return render(request, "blog/post-detail.html")
 
 
 class BlogList(generics.ListAPIView):
@@ -218,6 +227,21 @@ class GetUserFromTokenView(APIView):
     permission_classes = []
 
     def get(self, request, *args, **kwargs):
+        """
+        Retrieve user information from a JWT token.
+
+        Parameters:
+        request (HttpRequest): The incoming request.
+        args: Additional arguments.
+        kwargs: Additional keyword arguments.
+
+        Returns:
+        Response: A response containing the user information.
+
+        Raises:
+        HTTPException: If the request is not authorized or the token is invalid.
+
+        """
         # Get the JWT from the Authorization header
         authorization_header = request.headers.get('Authorization', '')
         if not authorization_header.startswith('Bearer '):
@@ -257,6 +281,20 @@ class GetUserDetailsView(APIView):
     permission_classes = [IsAuthenticated]
     
     def get(self, request, user_id, *args, **kwargs):
+        """
+        Retrieve the details of a specific user.
+
+        Parameters:
+        request (HttpRequest): The incoming request.
+        user_id (int): The unique ID of the user.
+
+        Returns:
+        Response: A response containing the user details.
+
+        Raises:
+        NotFound: If the user with the specified ID is not found.
+
+        """
         try:
             # Retrieve the user object using the provided user ID
             user = User.objects.get(id=user_id)

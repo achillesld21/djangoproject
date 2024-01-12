@@ -10,6 +10,18 @@ class JWTAuthentication(BaseAuthentication):
     Custom authentication class for JWT tokens.
     """
     def authenticate(self, request):
+        """
+        Authenticates the user based on the JWT in the request's Authorization header.
+
+        Args:
+            request (HttpRequest): The incoming request.
+
+        Returns:
+            tuple: A tuple containing the authenticated user and None for the credentials.
+
+        Raises:
+            exceptions.AuthenticationFailed: If the user is not authenticated or the token is invalid.
+        """
         # Retrieve the user model
         user_model = get_user_model()
 

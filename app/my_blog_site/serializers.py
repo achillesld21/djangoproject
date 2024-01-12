@@ -31,7 +31,19 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         """
-        Custom method to create a new user with additional fields (first_name, last_name, email).
+        Create a new user with the given validated data.
+
+        Parameters:
+        validated_data (dict): A dictionary of the data to use to create the user.
+            This dictionary should contain the following keys:
+                username (str): The username for the new user.
+                password (str): The password for the new user.
+                first_name (str): The first name for the new user.
+                last_name (str): The last name for the new user.
+                email (str): The email for the new user.
+
+        Returns:
+        User: The created user.
         """
         # Extract additional fields
         first_name = validated_data.pop('first_name', '')
